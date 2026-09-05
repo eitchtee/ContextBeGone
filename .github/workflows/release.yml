@@ -27,13 +27,13 @@ jobs:
         shell: bash
         run: echo "tag=${{ inputs.tag || github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # A manual re-run must build the code as it was at that tag, not whatever main
           # happens to be now, or the asset would not match the release.
           ref: ${{ steps.target.outputs.tag }}
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "9.0.x"
 
