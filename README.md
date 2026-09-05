@@ -1,65 +1,55 @@
 # ContextBeGone
 
-Take control of the Windows right-click menu.
+An editor for the classic Windows right-click menu. It finds every context menu entry registered on
+your system, including the ones registry-only tools miss, and lets you disable, edit, create or
+remove them. Every change is backed up to a `.reg` file first, so anything can be put back by
+double-clicking.
 
-ContextBeGone finds every classic context menu entry on your system — including the ones no
-registry-only tool can see — and lets you disable, edit, create or remove them. Nothing changes
-without a backup you can undo by double-clicking.
-
-Built for Windows 11, works on Windows 10.
-
----
+Built for Windows 11. Works on Windows 10.
 
 ## Download
 
-Grab **`ContextBeGone.exe`** from the [latest release](../../releases/latest) and run it.
-
-That is the whole thing: one file, no installer, no prerequisites. It keeps backups in a
-`ContextBeGone-Data` folder next to itself, so putting it on a USB stick works as you would expect.
-
----
+Get `ContextBeGone.exe` from the [latest release](../../releases/latest) and run it. It is a single
+file, with no installer and no runtime to set up first. Backups go into a `ContextBeGone-Data`
+folder beside the executable, so it runs fine from a USB stick.
 
 ## What it does
 
-**Finds everything.** Static verbs, COM handlers, drag-and-drop handlers, cascading submenus, the
-New submenu, and packaged (MSIX) shell extensions — around 2,700 entries across 1,500 scopes on a
-typical machine.
+It scans every place the shell looks for menu entries: static verbs, COM handlers, drag-and-drop
+handlers, cascading submenus, the New submenu, and packaged (MSIX) shell extensions. On a typical
+machine that comes to roughly 2,700 entries across 1,500 scopes.
 
-**Searches the whole system.** Type `notepad` and get every entry that mentions it, wherever it is
-registered, in about a second.
+Search covers all of them at once. Type `notepad` and you get every entry that mentions it, wherever
+it happens to be registered, in about a second.
 
-**Inspects a real menu.** Point it at any file or folder and it asks the shell what that menu
-actually contains, then traces every item back to whatever produces it — a registry key, a COM
-handler, or a packaged app. This is how you find the entry you can see but cannot locate.
+The inspector is the part you will probably use most. Point it at a real file or folder and it asks
+the shell what that menu actually contains, then traces each row back to the registry key, COM
+handler or packaged app that put it there. That is usually the quickest way to track down an entry
+you can see in the menu but cannot find in the registry.
 
-**Edits properly.** Display name, icon, command line, position, separators, SHIFT-only visibility.
-Or create a new entry from scratch.
-
-**Undoes anything.** Every change is preceded by a `.reg` export. Double-click it to put things back.
-
----
+Editing covers the display name, icon, command line, position, separators and SHIFT-only
+visibility. You can also create entries from scratch.
 
 ## How it stays safe
 
 Most built-in Windows entries live in registry keys owned by `TrustedInstaller`, where even an
-administrator has read-only access. Rather than fight that, ContextBeGone writes to
+administrator only has read access. Rather than fight that, ContextBeGone writes to
 `HKEY_CURRENT_USER\Software\Classes` instead.
 
-`HKEY_CLASSES_ROOT` is a merged view of the machine and per-user hives with the per-user side
-winning, so a change made there overrides a system entry **without modifying it**. The default mode
-therefore needs no administrator rights, never touches a system key, and is undone by deleting one
-per-user key.
+`HKEY_CLASSES_ROOT` is a merged view of the machine and per-user hives, and where a key exists in
+both, the per-user side wins. A change written there overrides a system entry without modifying it.
+So the default mode needs no administrator rights, leaves system keys untouched, and is undone by
+deleting a single per-user key.
 
-An *in place* mode covers the one thing the overlay cannot do — removing something Windows itself
-put there — and asks for elevation when it needs it.
+There is also an in place mode, for the one thing an overlay cannot do: removing something Windows
+itself put there. It asks for elevation when it needs it.
 
-Explorer only reads shell extensions when it loads them, so changes are invisible until it restarts.
-The app notices when that is the case and offers a button.
+Explorer only reads shell extensions at the moment it loads them, so a change stays invisible until
+it restarts. The app compares its own change times against Explorer's start time and offers a
+restart button when the two are out of step.
 
-For the full mechanism — every registration type, every scope, and how each is disabled — see
+The full mechanism, covering every registration type and scope and how each one is disabled, is in
 [docs/how-it-works.md](docs/how-it-works.md).
-
----
 
 ## Build from source
 
@@ -79,8 +69,6 @@ dotnet publish -c Release -r win-x64 --self-contained true \
   -p:EnableCompressionInSingleFile=true -o out
 ```
 
----
-
 ## Command line
 
 For scripting, or for looking around without the UI.
@@ -93,8 +81,6 @@ ContextBeGone.exe --inspect-ui <path>                Open the inspector on that 
 ContextBeGone.exe --toggle <scope> <key> <on|off>    Enable or disable one entry
 ```
 
----
-
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
