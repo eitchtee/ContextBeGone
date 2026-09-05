@@ -1,0 +1,75 @@
+name: Build release
+
+# Runs automatically when a release is published, and can be re-run by hand against any
+# existing release from the Actions tab. Re-runs overwrite the asset that is already there.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to rebuild, e.g. v1.0.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    # windows-latest is Windows Server, the closest GitHub offers to Windows 11.
+    # The binary itself targets win-x64, which is what matters for the people running it.
+    runs-on: windows-latest
+
+    steps:
+      - name: Work out which tag we are building
+        id: target
+        shell: bash
+        run: echo "tag=${{ inputs.tag || github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          # A manual re-run must build the code as it was at that tag, not whatever main
+          # happens to be now, or the asset would not match the release.
+          ref: ${{ steps.target.outputs.tag }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Publish a self-contained single file
+        shell: bash
+        run: |
+          dotnet publish src/ContextBeGone/ContextBeGone.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:EnableCompressionInSingleFile=true \
+            -p:Version="${TAG#v}" \
+            -o publish
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+
+      - name: Check the single file came out as expected
+        shell: bash
+        run: |
+          ls -la publish
+          test -f publish/ContextBeGone.exe || { echo "::error::ContextBeGone.exe was not produced"; exit 1; }
+          # A self-contained build with loose DLLs beside it is not the portable single file we promise.
+          stray=$(find publish -maxdepth 1 -name '*.dll' | wc -l)
+          if [ "$stray" -gt 0 ]; then
+            echo "::error::Publish left $stray DLLs next to the executable; it is not a single file"
+            exit 1
+          fi
+          echo "Size: $(du -h publish/ContextBeGone.exe | cut -f1)"
+
+      - name: Attach it to the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.target.outputs.tag }}
+        # --clobber replaces an asset of the same name, so re-running this workflow
+        # updates the download in place instead of failing or adding a duplicate.
+        run: gh release upload "$TAG" publish/ContextBeGone.exe --clobber

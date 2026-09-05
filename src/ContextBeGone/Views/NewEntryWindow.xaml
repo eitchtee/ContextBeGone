@@ -1,0 +1,53 @@
+<Window x:Class="ContextBeGone.Views.NewEntryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="New context menu entry"
+        Height="520" Width="560" ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Bg}"
+        FontFamily="Segoe UI" FontSize="12.5">
+
+    <DockPanel Margin="16">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Create" Click="OnCreate" IsDefault="True"
+                    Background="#FF2F4A7A" BorderBrush="{StaticResource Accent}" Padding="18,6" />
+            <Button Content="Cancel" IsCancel="True" Padding="18,6" Margin="0" />
+        </StackPanel>
+
+        <StackPanel>
+            <TextBlock x:Name="ScopeText" Style="{StaticResource Muted}" TextWrapping="Wrap" />
+
+            <TextBlock Text="KEY NAME" Style="{StaticResource SectionHeader}" />
+            <TextBox x:Name="KeyNameBox" Text="MyCommand" />
+            <TextBlock Text="The registry key under shell\. Menu items sort alphabetically by this name unless Position is set."
+                       Style="{StaticResource Muted}" Margin="0,3,0,0" />
+
+            <TextBlock Text="MENU TEXT (MUIVerb)" Style="{StaticResource SectionHeader}" />
+            <TextBox x:Name="LabelBox" Text="My command" />
+
+            <TextBlock Text="COMMAND" Style="{StaticResource SectionHeader}" />
+            <TextBox x:Name="CommandBox" TextWrapping="Wrap"
+                     Text="&quot;C:\Windows\System32\notepad.exe&quot; &quot;%1&quot;" />
+            <TextBlock Text="%1 = the clicked item, %V = the folder or background path, %* = every selected item. Quote paths."
+                       Style="{StaticResource Muted}" Margin="0,3,0,0" />
+
+            <TextBlock Text="ICON (optional)" Style="{StaticResource SectionHeader}" />
+            <TextBox x:Name="IconBox" />
+            <TextBlock Text="e.g. %SystemRoot%\system32\imageres.dll,-102"
+                       Style="{StaticResource Muted}" Margin="0,3,0,0" />
+
+            <TextBlock Text="PLACEMENT" Style="{StaticResource SectionHeader}" />
+            <StackPanel Orientation="Horizontal">
+                <ComboBox x:Name="PositionBox" Width="130">
+                    <ComboBoxItem Content="(default)" IsSelected="True" />
+                    <ComboBoxItem Content="Top" />
+                    <ComboBoxItem Content="Bottom" />
+                </ComboBox>
+                <CheckBox x:Name="ExtendedBox" Content="Only with SHIFT held" Margin="14,0,0,0" />
+            </StackPanel>
+
+            <TextBlock Text="The key is created in HKEY_CURRENT_USER\Software\Classes, so it applies to you only and needs no administrator rights."
+                       Style="{StaticResource Muted}" Margin="0,16,0,0" />
+        </StackPanel>
+    </DockPanel>
+</Window>
